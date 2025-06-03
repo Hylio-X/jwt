@@ -39,21 +39,21 @@ func TestJWT_GenerateToken(t *testing.T) {
 
 	time.Sleep(time.Second)
 
-	token, err = auth.RefreshToken(token.Token)
+	token, err = auth.RefreshToken(token.Token, false)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	t.Logf("%+v", token)
 
-	p, err := auth.ExtractPayload(token.Token)
+	p, err := auth.ExtractPayload(token.Token, false)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	t.Logf("%+v", p)
 
-	identity, err := auth.ExtractIdentity(token.Token)
+	identity, err := auth.ExtractIdentity(token.Token, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -78,23 +78,23 @@ func TestJWT_Middleware(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if token, err = auth.Http().RefreshToken(r); err != nil {
+	if token, err = auth.Http().RefreshToken(r, false); err != nil {
 		t.Fatal(err)
 	}
 
-	if payload, err = auth.Http().ExtractPayload(r); err != nil {
+	if payload, err = auth.Http().ExtractPayload(r, false); err != nil {
 		t.Fatal(err)
 	} else {
 		t.Log(payload)
 	}
 
-	if token, err = auth.Http().ExtractToken(r); err != nil {
+	if token, err = auth.Http().ExtractToken(r, false); err != nil {
 		t.Fatal(err)
 	} else {
 		t.Log(token)
 	}
 
-	if identity, err := auth.Http().ExtractIdentity(r); err != nil {
+	if identity, err := auth.Http().ExtractIdentity(r, false); err != nil {
 		t.Fatal(err)
 	} else {
 		t.Log(identity)

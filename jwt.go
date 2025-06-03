@@ -117,7 +117,7 @@ func (j *JWT) GenerateToken(payload Payload) (*Token, error) {
 // RefreshToken Retreads and returns a new token object depend on old token.
 // By default, the token expired error doesn't be ignored.
 // You can ignore expired error by setting the `ignoreExpired` parameter.
-func (j *JWT) RefreshToken(token string, ignoreExpired ...bool) (*Token, error) {
+func (j *JWT) RefreshToken(token string, ignoreExpired bool, options ...jwt.ParserOption) (*Token, error) {
 	if token == "" {
 		return nil, errMissingToken
 	}
@@ -129,7 +129,7 @@ func (j *JWT) RefreshToken(token string, ignoreExpired ...bool) (*Token, error) 
 		now       = time.Now()
 	)
 
-	claims, err = j.parseToken(token, ignoreExpired...)
+	claims, err = j.parseToken(token, ignoreExpired, options...)
 	if err != nil {
 		return nil, err
 	}
@@ -206,8 +206,8 @@ func (j *JWT) DestroyToken(token string) error {
 // ExtractPayload Extracts and returns payload from the token.
 // By default, The token expiration errors will not be ignored.
 // The payload is nil when the token expiration errors not be ignored.
-func (j *JWT) ExtractPayload(token string, ignoreExpired ...bool) (Payload, error) {
-	claims, err := j.parseToken(token, ignoreExpired...)
+func (j *JWT) ExtractPayload(token string, ignoreExpired bool, options ...jwt.ParserOption) (Payload, error) {
+	claims, err := j.parseToken(token, ignoreExpired, options...)
 	if err != nil {
 		return nil, err
 	}
@@ -232,12 +232,12 @@ func (j *JWT) ExtractPayload(token string, ignoreExpired ...bool) (Payload, erro
 // ExtractIdentity Retrieve identity from token.
 // By default, the token expired error doesn't be ignored.
 // You can ignore expired error by setting the `ignoreExpired` parameter.
-func (j *JWT) ExtractIdentity(token string, ignoreExpired ...bool) (interface{}, error) {
+func (j *JWT) ExtractIdentity(token string, ignoreExpired bool, opoptions ...jwt.ParserOption) (interface{}, error) {
 	if j.opts.identityKey == "" {
 		return nil, errMissingIdentity
 	}
 
-	payload, err := j.ExtractPayload(token, ignoreExpired...)
+	payload, err := j.ExtractPayload(token, ignoreExpired, opoptions...)
 	if err != nil {
 		return nil, err
 	}
@@ -273,7 +273,8 @@ func (j *JWT) signToken(claims jwt.MapClaims) (string, error) {
 }
 
 // Parses and returns payload from the token.
-func (j *JWT) parseToken(token string, ignoreExpired ...bool) (jwt.MapClaims, error) {
+// Parses and returns payload from the token.
+func (j *JWT) parseToken(token string, ignoreExpired bool, options ...jwt.ParserOption) (jwt.MapClaims, error) {
 	if token == "" {
 		return nil, errMissingToken
 	}
@@ -289,16 +290,16 @@ func (j *JWT) parseToken(token string, ignoreExpired ...bool) (jwt.MapClaims, er
 		default:
 			return j.publicKey, nil
 		}
-	})
+	}, options...) // 传递 options
+
 	if err != nil {
 		if errors.Is(err, jwt.ErrTokenExpired) {
-			if len(ignoreExpired) > 0 && ignoreExpired[0] {
+			if ignoreExpired {
 				// ignore token expired error
 			} else {
 				return nil, errExpiredToken
 			}
 		}
-
 		return nil, errInvalidToken
 	}
 
@@ -306,16 +307,17 @@ func (j *JWT) parseToken(token string, ignoreExpired ...bool) (jwt.MapClaims, er
 		return nil, errInvalidToken
 	}
 
-	claims := jt.Claims.(jwt.MapClaims)
+	claims, ok := jt.Claims.(jwt.MapClaims)
+	if !ok {
+		return nil, errInvalidToken
+	}
 
 	if _, ok := claims[jwtId]; !ok {
 		return nil, errInvalidToken
 	}
-
 	if _, ok := claims[jwtIssueAt]; !ok {
 		return nil, errInvalidToken
 	}
-
 	if _, ok := claims[jwtExpired]; !ok {
 		return nil, errInvalidToken
 	}

@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/golang-jwt/jwt/v5"
 )
 
 const (
@@ -54,8 +56,8 @@ func NewHttp(jwt *JWT) *Http {
 // RefreshToken Generates and returns a new token object from request.
 // By default, the token expired error doesn't be ignored.
 // You can ignore expired error by setting the `ignoreExpired` parameter.
-func (h *Http) RefreshToken(r *http.Request, ignoreExpired ...bool) (*Token, error) {
-	return h.jwt.RefreshToken(h.lookupToken(r), ignoreExpired...)
+func (h *Http) RefreshToken(r *http.Request, ignoreExpired bool, opoptions ...jwt.ParserOption) (*Token, error) {
+	return h.jwt.RefreshToken(h.lookupToken(r), ignoreExpired, opoptions...)
 }
 
 // DestroyToken Destroy a token.
@@ -72,7 +74,7 @@ func (h *Http) DestroyToken(r *http.Request) error {
 // ExtractToken Extracts and returns a token object from request.
 // By default, the token expired error doesn't be ignored.
 // You can ignore expired error by setting the `ignoreExpired` parameter.
-func (h *Http) ExtractToken(r *http.Request, ignoreExpired ...bool) (*Token, error) {
+func (h *Http) ExtractToken(r *http.Request, ignoreExpired bool, opoptions ...jwt.ParserOption) (*Token, error) {
 	var token string
 
 	if v := r.Context().Value(defaultTokenCtxKey); v != nil {
@@ -81,7 +83,7 @@ func (h *Http) ExtractToken(r *http.Request, ignoreExpired ...bool) (*Token, err
 		return nil, errMissingToken
 	}
 
-	claims, err := h.jwt.parseToken(token, ignoreExpired...)
+	claims, err := h.jwt.parseToken(token, ignoreExpired, opoptions...)
 	if err != nil {
 		return nil, err
 	}
@@ -99,11 +101,11 @@ func (h *Http) ExtractToken(r *http.Request, ignoreExpired ...bool) (*Token, err
 // ExtractPayload Retrieve payload from request.
 // By default, the token expired error doesn't be ignored.
 // You can ignore expired error by setting the `ignoreExpired` parameter.
-func (h *Http) ExtractPayload(r *http.Request, ignoreExpired ...bool) (payload Payload, err error) {
+func (h *Http) ExtractPayload(r *http.Request, ignoreExpired bool, opoptions ...jwt.ParserOption) (payload Payload, err error) {
 	if v := r.Context().Value(defaultPayloadCtxKey); v != nil {
 		payload = v.(Payload)
 	} else {
-		payload, _, err = h.parseRequest(r, ignoreExpired...)
+		payload, _, err = h.parseRequest(r, ignoreExpired, opoptions...)
 	}
 	return
 }
@@ -111,12 +113,12 @@ func (h *Http) ExtractPayload(r *http.Request, ignoreExpired ...bool) (payload P
 // ExtractIdentity Retrieve identity from request.
 // By default, the token expired error doesn't be ignored.
 // You can ignore expired error by setting the `ignoreExpired` parameter.
-func (h *Http) ExtractIdentity(r *http.Request, ignoreExpired ...bool) (interface{}, error) {
+func (h *Http) ExtractIdentity(r *http.Request, ignoreExpired bool, opoptions ...jwt.ParserOption) (interface{}, error) {
 	if h.jwt.opts.identityKey == "" {
 		return nil, errMissingIdentity
 	}
 
-	payload, err := h.ExtractPayload(r, ignoreExpired...)
+	payload, err := h.ExtractPayload(r, ignoreExpired, opoptions...)
 	if err != nil {
 		return nil, err
 	}
@@ -131,7 +133,7 @@ func (h *Http) ExtractIdentity(r *http.Request, ignoreExpired ...bool) (interfac
 
 // Middleware Implemented basic JWT permission authentication.
 func (h *Http) Middleware(r *http.Request) (*http.Request, error) {
-	payload, token, err := h.parseRequest(r)
+	payload, token, err := h.parseRequest(r, false)
 	if err != nil {
 		return nil, err
 	}
@@ -144,13 +146,13 @@ func (h *Http) Middleware(r *http.Request) (*http.Request, error) {
 }
 
 // Parses and returns the payload and token from requests.
-func (h *Http) parseRequest(r *http.Request, ignoreExpired ...bool) (payload Payload, token string, err error) {
+func (h *Http) parseRequest(r *http.Request, ignoreExpired bool, options ...jwt.ParserOption) (payload Payload, token string, err error) {
 	if token = h.lookupToken(r); token == "" {
 		err = errMissingToken
 		return
 	}
 
-	payload, err = h.jwt.ExtractPayload(token, ignoreExpired...)
+	payload, err = h.jwt.ExtractPayload(token, ignoreExpired, options...)
 	return
 }
 
