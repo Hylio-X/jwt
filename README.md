@@ -6,6 +6,10 @@ A JWT plugin for gin, iris, go-frame, beego, go-zero, go-chassis, go-kit and oth
 
 Download and install
 
+## **Note**  
+> This project is forked from [dobyte/jwt](https://github.com/dobyte/jwt). The original version did not support `ParserOption`, so modifications have been made to add this feature.  
+> 本项目基于 [dobyte/jwt](https://github.com/dobyte/jwt) ，因原版不支持 `ParserOption`，因此进行了相关修改。
+
 ```shell
 go get github.com/Hylio-X/jwt
 ```
@@ -36,7 +40,7 @@ func main() {
 
 	token, err := auth.GenerateToken(jwt.Payload{
 		"uid":     1,
-		"account": "fuxiao",
+		"account": "hylio",
 	})
 	if err != nil {
 		log.Fatal("Generate token failed:" + err.Error())
@@ -46,10 +50,3 @@ func main() {
 }
 ```
 
-## Example
-
-View demo [example/server.go](example/server.go)
-
-## API Demo
-
-View demo [example/jwt.postman.json](example/jwt.postman.json)
