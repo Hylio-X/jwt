@@ -1,10 +1,11 @@
 package jwt_test
 
 import (
-	"github.com/dobyte/jwt"
 	"net/http"
 	"testing"
 	"time"
+
+	"github.com/Hylio-X/jwt"
 )
 
 var (

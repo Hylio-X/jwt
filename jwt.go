@@ -3,13 +3,14 @@ package jwt
 import (
 	"errors"
 	"fmt"
-	"github.com/dobyte/jwt/internal/conv"
-	"github.com/golang-jwt/jwt/v5"
 	"math"
 	"os"
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/Hylio-X/jwt/internal/conv"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 const (
