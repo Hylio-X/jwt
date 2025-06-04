@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Hylio-X/jwt/internal/conv"
+	"github.com/Hylio-X/jwt/conv"
 	"github.com/golang-jwt/jwt/v5"
 )
 

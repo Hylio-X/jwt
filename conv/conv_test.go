@@ -12,7 +12,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/Hylio-X/jwt/internal/conv"
+	"github.com/Hylio-X/jwt/conv"
 )
 
 type student struct {
