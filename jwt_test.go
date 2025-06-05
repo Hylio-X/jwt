@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Hylio-X/jwt"
+	"github.com/hylio1127/jwt"
 )
 
 var (

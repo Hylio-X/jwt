@@ -1,4 +1,4 @@
-module github.com/Hylio-X/jwt
+module github.com/hylio1127/jwt
 
 go 1.16
 

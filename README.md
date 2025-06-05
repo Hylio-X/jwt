@@ -11,7 +11,7 @@ A JWT plugin for gin, iris, go-frame, beego, go-zero, go-chassis, go-kit and oth
 
 Download and install
 ```shell
-go get github.com/Hylio-X/jwt
+go get github.com/hylio1127/jwt
 ```
 
 
@@ -24,7 +24,7 @@ package main
 import (
 	"fmt"
 	"log"
-	"github.com/Hylio-X/jwt"
+	"github.com/hylio1127/jwt"
 )
 
 func main() {

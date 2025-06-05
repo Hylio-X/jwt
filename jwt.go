@@ -9,8 +9,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Hylio-X/jwt/conv"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/hylio1127/jwt/conv"
 )
 
 const (
